@@ -1,0 +1,3 @@
+print(str) {
+	FileAppend, %str%, *
+}

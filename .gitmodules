@@ -1,0 +1,6 @@
+[submodule "Lib/JSON"]
+	path = Lib/JSON
+	url = https://github.com/cocobelgica/AutoHotkey-JSON.git
+[submodule "Lib/MCode4GCC"]
+	path = Lib/MCode4GCC
+	url = https://github.com/joedf/MCode4GCC.git
