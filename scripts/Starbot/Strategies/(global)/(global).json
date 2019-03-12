@@ -1,0 +1,41 @@
+{
+    "coords": {},
+    "imageQueries": {
+        "__UI": {
+            "dims": {
+                "bottomRight": {
+                    "x": 2541,
+                    "y": 1100
+                },
+                "topLeft": {
+                    "x": 2470,
+                    "y": 1071
+                }
+            },
+            "path": "C:\\Users\\Joe\\Documents\\AutoHotkey\\scripts\\Starbot\\Strategies\\(global)\\images\\__UI_1.png",
+            "searchContext": {
+                "bottomRight": {
+                    "x": 2559,
+                    "y": 1135
+                },
+                "topLeft": {
+                    "x": 2407,
+                    "y": 989
+                }
+            }
+        }
+    },
+    "points": {},
+    "rects": {
+		"__minimap": {
+			"topLeft": {
+				"x": 37,
+				"y": 1077
+			},
+			"bottomRight": {
+				"x": 387,
+				"y": 1425
+			}
+		}
+	}
+}

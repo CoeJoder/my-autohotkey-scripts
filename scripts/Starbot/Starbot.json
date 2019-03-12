@@ -1,0 +1,49 @@
+{
+    "coords": {
+		"__minimap": [
+            {
+                "battlefield": [
+                    {
+                        "x": 37,
+                        "y": 1077
+                    },
+                    {
+                        "x": 387,
+                        "y": 1425
+                    }
+                ],
+                "minimap": {
+                    "x": 0,
+                    "y": 0
+                }
+            }
+        ]
+	},
+    "imageQueries": {
+        "__UI": {
+            "dims": {
+                "bottomRight": {
+                    "x": 2541,
+                    "y": 1100
+                },
+                "topLeft": {
+                    "x": 2470,
+                    "y": 1071
+                }
+            },
+            "path": "C:\\Users\\Joe\\Documents\\AutoHotkey\\scripts\\Starbot\\Assets\\images\\__UI_1.png",
+            "searchContext": {
+                "bottomRight": {
+                    "x": 2559,
+                    "y": 1135
+                },
+                "topLeft": {
+                    "x": 2407,
+                    "y": 989
+                }
+            }
+        }
+    },
+    "points": {},
+    "rects": {}
+}
