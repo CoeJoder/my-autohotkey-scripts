@@ -7,3 +7,6 @@
 [submodule "Lib/AHKsock"]
 	path = Lib/AHKsock
 	url = https://github.com/jleb/AHKsock.git
+[submodule "Lib/Eval"]
+	path = Lib/Eval
+	url = https://github.com/Pulover/Eval.git
