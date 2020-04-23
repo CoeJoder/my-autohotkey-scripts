@@ -4,7 +4,7 @@
 ;
 ; Author: Joe Nasca
 ;**********************************************************************************
-#Include <ConsoleLogger>
+#Include <ConsoleApp>
 #Include <JSON>
 #include <FunctionObject>
 #Include <HtmlUtils>
@@ -26,7 +26,10 @@ class Starbot {
 	static CONSOLE_FONT := "Consolas"
 	static CONSOLE_FONT_SIZE := 14
 	static CONSOLE_INPUT_HEIGHT := 30
-	static CONSOLE_STYLESHEET := "Assets\webfontkit\stylesheet.css"
+	static CONSOLE_STYLESHEET := A_WorkingDir "\Assets\webfontkit\stylesheet.css"
+	static AHK_LIB_FOLDER := RelToAbs(A_WorkingDir, "..\..\Lib")
+	static CONSOLE_HEADER := Starbot.__Class
+	static CONSOLE_TIMESTAMP := True
 	static MINIMAP_HBAR := "Assets\images\__minimap_hbar.png"
 	static MINIMAP_VBAR := "Assets\images\__minimap_vbar.png"
 	static CONFIG_FILE := "Starbot.json"
@@ -36,20 +39,10 @@ class Starbot {
 	static INPUT_BLOCKER := new InputBlocker(Starbot.INPUT_BLOCKER_PASSWORD)
 	
 	__New(_x, _y, _w, _h, _opacity:=0) {
-		; console
-		Starbot.CONSOLE_INSTANCE := new ConsoleLogger(Starbot.CONSOLE_NAME, RelToAbs(A_WorkingDir, "..\..\Lib"))
-		this.console := Starbot.CONSOLE_INSTANCE
-		this.console.Show(_x, _y, _w, _h, Starbot.CONSOLE_WINTITLE, true, ""
-				, Starbot.CONSOLE_FONT, Starbot.CONSOLE_FONT_SIZE, Starbot.CONSOLE_INPUT_HEIGHT)
-		if (_opacity > 0) {
-			WinSet, Transparent, %_opacity%, % Starbot.CONSOLE_WINTITLE
-		}
-		this.console.OnResize()
+		this.console := new ConsoleLogger(Starbot.CONSOLE_WINTITLE, Starbot.AHK_LIB_FOLDER, _x, _y, _w, _h, _opacity
+				, Starbot.CONSOLE_TIMESTAMP, Starbot.CONSOLE_FONT, Starbot.CONSOLE_FONT_SIZE, Starbot.CONSOLE_INPUT_HEIGHT)
 		this.console.Clear()
-		this.console.AddJquery()
-		this.console.AddStylesheetElement(A_WorkingDir "\" Starbot.CONSOLE_STYLESHEET)
-		this.console.AppendHtml(HtmlUtils.CenteredHeader(Format("{:U}", Starbot.__Class)))
-		OnError(Starbot.HandleError.Bind(this))	; display Exceptions in the console
+		this.console.AddStylesheetElement(Starbot.CONSOLE_STYLESHEET)
 		; GDI+
 		this.gdipToken := Gdip_Startup()
 		OnExit(Starbot.StopGdiPlus.Bind(this))
@@ -61,7 +54,12 @@ class Starbot {
 		this.strategy := "" ; null
 		; select first strategy by default, or (global) if none
 		this.SelectStrategy(Starbot.STRATEGIES.Count() = 0 ? 1 : 2)
-		this.isInstantiated := true
+	}
+	
+	; exception handler
+	HandleError(e) {
+		this.handler.done := true
+		return base.HandleError(e)
 	}
 	
 	DisplayCommandPrompt() {
@@ -184,15 +182,6 @@ class Starbot {
 			Gdip_Shutdown(this.gdipToken)
 	}
 	
-	; exception handler
-	HandleError(e) {
-		this.handler.done := true
-		this.console.AppendException(e)
-		if (!this.isInstantiated)
-			Suspend, On	; restart required
-		return true	; exit current thread
-	}
-	
 	; [static] Registers a strategy in static memory (necessary hack for IoC)
 	RegisterStrategy(_impl) {
 		Starbot.STRATEGIES.Push(_impl)
@@ -205,19 +194,6 @@ class Starbot {
 		Sleep, % _millis ? _millis : Starbot.PAUSE_MS
 		if (Starbot.INPUT_BLOCKER.IsInterrupted())
 			Exit
-	}
-	
-	; never called; for GUI subroutine encapsulation only
-	_guiSubroutines() {
-		return
-StarbotConsoleGuiSize:
-	If (A_EventInfo != 1) {	; if not minimized
-		Starbot.CONSOLE_INSTANCE.OnResize()
-	}
-Return
-StarbotConsoleGuiClose:
-	ExitApp
-Return
 	}
 	
 	class Point {

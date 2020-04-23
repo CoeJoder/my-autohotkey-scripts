@@ -6,17 +6,6 @@
  `
  ` *** TODO *** remove the AfterLemon dependency and make this standalone.
  ` 
- ` In order for resizing to work, you must define a GuiSize subroutine
- ` to handle resize events, then call OnResize().
- ` e.g.
- `
- ` log := new ConsoleLogger("Foobar", "/absolute/path/to/Lib")
- ` FoobarGuiSize:
- `     If (A_EventInfo = 1)	; window minimized
- `         Return
- `     log.OnResize()
- ` Return
- `
  ` @author jnasca
  ``````````````````````````````````````````````````````````````````````````````
  */
@@ -24,6 +13,8 @@
 #include <AutoXYWH>
 
 Class ConsoleLogger {
+	static INSTANCE := "" ; lazy singleton
+	static CONSOLE_INSTANCE_VARNAME := "ConsoleLogger_ConsoleObj"
 	static JS_JQUERY := "\js\jquery-1.12.4.js"
 	static JS_SHCORE := "\js\shCore.js"
 	static JS_AHKBRUSH := "\js\shBrushAhk.js"
@@ -31,7 +22,7 @@ Class ConsoleLogger {
 	static CSS_SHCORE := "\css\shCore.css"
 	static CSS_SHTHEME_ZENBURN := "\css\shThemeZenburn-A.css"
 	
-	Name := ""
+	_ahkLibDir := ""
 	_guiTitle := ""
 	_console := ""
 	_document := ""
@@ -42,41 +33,79 @@ Class ConsoleLogger {
 	_prevWaitImage := ""
 	_logWaitRow := 0
 	_onInput := "" ; null
+	_enableExceptionHandling := True
 	
-	__New(name, libDir) {
-		This.Name := name
-		This._libDir := libDir
+	__New(guiTitle, ahkLibDir, x, y, w, h, opacity:=200, timestamp:=true, font:="Consolas", fontSize:=10, inputH:=22) {
+		this._guiTitle := guiTitle
+		this._ahkLibDir := ahkLibDir
+		_name := ConsoleLogger.CONSOLE_INSTANCE_VARNAME
+		Class_Console(_name, x, y, w, h, guiTitle, timestamp, "", font, fontSize, inputH, this)
+		
+		this._console := %_name%
+		varDocument := this._console.edit
+		this._document := %varDocument%
+		this._hwndDocument := hwndDocument%_name%
+		this._hwndEdit := hwndEdit%_name%
+		
+		ConsoleLogger.INSTANCE := this
+		this._console.show()
+		
+		; jquerify!
+		this.AddJquery()
+		; autohotkey syntax highlighting
+		; TODO not compatible with MSHTML; find replacement
+		;~ this._addScriptElement(this._ahkLibDir . this.JS_SHCORE)
+		;~ this._addScriptElement(this._ahkLibDir . this.JS_AHKBRUSH)
+		;~ this._addStylesheet(this._ahkLibDir . this.CSS_SHCORE)
+		;~ this._addStylesheet(this._ahkLibDir . this.CSS_SHTHEME_ZENBURN)
+		
+		; enable clipboard copying
+		ComObjConnect(this._document, new this.Event())
+		
+		; opacity: 255 max
+		if (opacity > 0) {
+			WinSet, Transparent, %opacity%, % guiTitle
+		}
+		
+		this.con.OnResize()
+		if (this._enableExceptionHandling) {
+			OnError(ConsoleLogger._ExceptionHandler.bind(this))
+		}
+		return this
+				
+		ConsoleLogger_ConsoleObjGuiSize:
+			if (A_EventInfo != 1) {	; if not minimized
+				ConsoleLogger.INSTANCE.OnResize()
+			}
+			return
+		
+		ConsoleLogger_ConsoleObjGuiClose:
+			ExitApp
+			return
 	}
 		
 	__Delete() {
-		This._console.Destroy()
+		; unhook the exception handler
+		this.EnableExceptionHandling(False)
+		this._console.Destroy()
 	}
 	
-	Show(x, y, w, h, guiTitle, timestamp:=true, html:="", font:="Consolas", fontSize:=10, inputH:=22) {
-		name := This.Name
-		If (!This._console) {
-			This._guiTitle := guiTitle
-			_conobj := Class_Console(name, x, y, w, h, guiTitle, timestamp, html, font, fontSize, inputH, this)
-			
-			This._console := %name%
-			varDocument := This._console.edit
-			This._document := %varDocument%
-			This._hwndDocument := hwndDocument%name%
-			This._hwndEdit := hwndEdit%name%
-			
-			This._console.show()
-
-			; jquerify!
-			This.AddJquery()
-			; autohotkey syntax highlighting
-			; TODO not compatible with MSHTML; find replacement
-			;~ This._addScriptElement(This._libDir . This.JS_SHCORE)
-			;~ This._addScriptElement(This._libDir . This.JS_AHKBRUSH)
-			;~ This._addStylesheet(This._libDir . This.CSS_SHCORE)
-			;~ This._addStylesheet(This._libDir . This.CSS_SHTHEME_ZENBURN)
-			
-			; enable clipboard copying
-			ComObjConnect(this._document, new this.Event())
+	; passed to OnError()
+	_ExceptionHandler(e) {
+		this.AppendException(e)
+		return true	; exit current thread
+	}
+	
+	EnableExceptionHandling(enableIt) {
+		if (this._enableExceptionHandling != enableIt) {
+			this._enableExceptionHandling := enableIt
+			handler := ConsoleLogger._ExceptionHandler.bind(this)
+			if (this._enableExceptionHandling) {
+				OnError(handler)
+			}
+			else {
+				OnError(handler, 0)
+			}
 		}
 	}
 	
@@ -91,105 +120,105 @@ Class ConsoleLogger {
 	}
 	
 	Activate() {
-		WinActivate, % This._guiTitle
+		WinActivate, % this._guiTitle
 	}
 	
 	FocusInput() {
-		_hwnd := This._hwndEdit
+		_hwnd := this._hwndEdit
 		ControlFocus, , ahk_id %_hwnd%
 	}
 	
 	AddScriptElement(src) {
-		s := This._document.createElement("script")
+		s := this._document.createElement("script")
 		s.type := "text/javascript"
 		s.src := src
-		This._document.getElementsByTagName("head")[0].appendChild(s)
+		this._document.getElementsByTagName("head")[0].appendChild(s)
 	}
 	
 	AddStylesheetElement(href) {
-		s := This._document.createElement("link")
+		s := this._document.createElement("link")
 		s.type := "text/css"
 		s.rel := "stylesheet"
 		s.href := href
-		This._document.getElementsByTagName("head")[0].appendChild(s)
+		this._document.getElementsByTagName("head")[0].appendChild(s)
 	}
 	
 	AddJquery() {
-		This.AddScriptElement(This._libDir . This.JS_JQUERY)
+		this.AddScriptElement(this._ahkLibDir . this.JS_JQUERY)
 	}
 	
 	GetDocument() {
-		return This._document
+		return this._document
 	}
 	
 	; highlight AHK syntax in the HTML
 	; TODO not compatible
 	;~ HighlightSyntax() {
-		;~ This._addScriptElement(This.JS_ACTIVATE_SYNTAX_HIGHLIGHTER)
+		;~ this._addScriptElement(this.JS_ACTIVATE_SYNTAX_HIGHLIGHTER)
 	;~ }
 		
 	Debug(params*) {
-		This._ResetLogWait()
-		if (This._console) {
-			This._console.Debug(params*)
+		this._ResetLogWait()
+		if (this._console) {
+			this._console.Debug(params*)
 		}
-		;~ This._StdOutImpl(params*)
+		;~ this._StdOutImpl(params*)
 	}		
 	
 	StdOut(str, nl:=True) {
-		This._ResetLogWait()
-		This._StdOutImpl(str, nl)
+		this._ResetLogWait()
+		this._StdOutImpl(str, nl)
 	}
 	
 	Clear(params*) {
-		This._ResetLogWait()
-		if (This._console) {
-			This._console.Clear(params*)
+		this._ResetLogWait()
+		if (this._console) {
+			this._console.Clear(params*)
 		}
 	}
 	
 	SetColor(color) {
-		This._console.color(color)
+		this._console.color(color)
 	}
 		
 	Log(params*) {
-		This._ResetLogWait()
-		if (This._console) {
-			This._console.Log(params*)
+		this._ResetLogWait()
+		if (this._console) {
+			this._console.Log(params*)
 		}
-		;~ This._StdOutImpl(params*)
+		;~ this._StdOutImpl(params*)
 	}
 	
 	LogError(str) {
-		This._ResetLogWait()
-		If (This._console) {
-			This._console.color("red")
-			This._console.log("[ERROR] " . str)
-			This._console.color("white")
+		this._ResetLogWait()
+		if (this._console) {
+			this._console.color("red")
+			this._console.log("[ERROR] " . str)
+			this._console.color("white")
 		}
-		;~ This._StdOutImpl("[ERROR] " . str)
+		;~ this._StdOutImpl("[ERROR] " . str)
 	}
 	
 	AppendError(str) {
-		This._ResetLogWait()
-		If (This._console) {
-			This._console.color("red")
-			This._console.Append("[ERROR] " . str)
-			This._console.color("white")
+		this._ResetLogWait()
+		if (this._console) {
+			this._console.color("red")
+			this._console.Append("[ERROR] " . str)
+			this._console.color("white")
 		}
-		;~ This._StdOutImpl("[ERROR] " . str)
+		;~ this._StdOutImpl("[ERROR] " . str)
 	}
 	
 	LogException(e) {
-		This._ResetLogWait()
+		this._ResetLogWait()
 		;~ _errstr := "Exception thrown!`n`twhat: " e.what "`n`tfile: " e.file "`n`tline: " e.line "`n`tmessage: " e.message "`n`textra: " e.extra
-		This.LogError(this._exceptionToString(e))
+		this.LogError(this._exceptionToString(e))
 	}
 	
 	AppendException(e) {
-		This._ResetLogWait()
+		this._ResetLogWait()
 		;~ _errstr := "Exception thrown!`n`twhat: " e.what "`n`tfile: " e.file "`n`tline: " e.line "`n`tmessage: " e.message "`n`textra: " e.extra
-		This.AppendError(this._exceptionToString(e))
+		this.AppendError(this._exceptionToString(e))
 	}
 	
 	_exceptionToString(e) {
@@ -198,78 +227,78 @@ Class ConsoleLogger {
 	}
 		
 	Prepend(params*) {
-		This._ResetLogWait()
-		if (This._console) {
-			This._console.Prepend(params*)
+		this._ResetLogWait()
+		if (this._console) {
+			this._console.Prepend(params*)
 		}
-		;~ This._StdOutImpl(params*)
+		;~ this._StdOutImpl(params*)
 	}
 	
 	Append(params*) {
-		This._ResetLogWait()
-		if (This._console) {
-			This._console.Append(params*)
+		this._ResetLogWait()
+		if (this._console) {
+			this._console.Append(params*)
 		}
-		;~ This._StdOutImpl(params*)
+		;~ this._StdOutImpl(params*)
 	}
 	
 	AppendWithColor(color, params*) {
-		This._ResetLogWait()
-		This._console.color(color)
-		This.Append(params*)
-		This._console.color()	; default
+		this._ResetLogWait()
+		this._console.color(color)
+		this.Append(params*)
+		this._console.color()	; default
 	}
 	
 	AppendHtml(html) {
-		This._ResetLogWait()
-		If (This._console) {
-			This._document.write(html)
-			This._document.getElementById("bod").scrollIntoView(False)
+		this._ResetLogWait()
+		if (this._console) {
+			this._document.write(html)
+			this._document.getElementById("bod").scrollIntoView(False)
 		}
 	}
 	
 	AppendImage(command, image:=0) {
 		waitDivPrefix := "waitDiv_"
-		If (This._prevWaitCommand = command 
-				&& This._prevWaitImage = image) {
+		if (this._prevWaitCommand = command 
+				&& this._prevWaitImage = image) {
 			
-			This._StdOutImpl(".", False)
-			if (This._console) {
-				waitDiv := waitDivPrefix . This._logWaitRow
+			this._StdOutImpl(".", False)
+			if (this._console) {
+				waitDiv := waitDivPrefix . this._logWaitRow
 				js := "jQuery('#" waitDiv "').append('<span>.</span>');"
-				This._document.parentWindow.execScript(js)
+				this._document.parentWindow.execScript(js)
 			}
 		}
 		Else {
-			This._StdOutImpl(command . (image ? " (" . image . ")" : ""))
-			This._prevWaitCommand := command
-			This._prevWaitImage := image
-			if (This._console) {
-				This._logWaitRow := This._console.line
-				waitDiv := waitDivPrefix . This._logWaitRow
+			this._StdOutImpl(command . (image ? " (" . image . ")" : ""))
+			this._prevWaitCommand := command
+			this._prevWaitImage := image
+			if (this._console) {
+				this._logWaitRow := this._console.line
+				waitDiv := waitDivPrefix . this._logWaitRow
 				
 				html := "<div id=""" waitDiv """>"
 				divClose := "</div>"
-				If (image) {
+				if (image) {
 					html .= "<img style=""vertical-align:middle"" src=""" . image . """ alt=""" . image . """>"
 				}
 				html .= "<span>" command "</span>" . divClose
-				This._console.Append(html)
+				this._console.Append(html)
 			}
 		}
 	}
 	
 	SetHtml(html) {
-		This._ResetLogWait()
-		If (This._console) {
-			This._document.open()
-			This._document.write(html)
-			This._document.close()
+		this._ResetLogWait()
+		if (this._console) {
+			this._document.open()
+			this._document.write(html)
+			this._document.close()
 		}
 	}
 	
 	ExecuteJavaScript(js) {
-		This._document.parentWindow.execScript(js)
+		this._document.parentWindow.execScript(js)
 	}
 	
 	; bound func will be called with the text string as an argument
@@ -282,32 +311,50 @@ Class ConsoleLogger {
 	}
 	
 	; called by wrapped console obj
- 	OnInput(text) {
-		This._ResetLogWait()
+ 	OnInput(text, persistent:=False) {
+		this._ResetLogWait()
+		_passThru := True
 		if (this._onInput) {
 			try {
-				this._onInput.Call(text)
+				_passThru := this._onInput.Call(text)
 			}
 			finally {
-				this._onInput := "" ; null
+				if (!persistent) {
+					this._onInput := "" ; null
+				}
 			}
-			return 0
 		}
 		else {
-			return 1 ; pass-thru
+			if (!persistent) {
+				this._onInput := "" ; null
+			}
 		}
+		return _passThru
+		
+		;~ if (this._onInput) {
+			;~ try {
+				;~ this._onInput.Call(text)
+			;~ }
+			;~ finally {
+				;~ this._onInput := "" ; null
+			;~ }
+			;~ return False
+		;~ }
+		;~ else {
+			;~ return True ; pass-thru
+		;~ }
 	}
 	
 	OnResize() {
-		If (This._console) {
-			AutoXYWH("*wh", This._hwndDocument)
-			AutoXYWH("*yw", This._hwndEdit)
+		if (this._console) {
+			AutoXYWH("*wh", this._hwndDocument)
+			AutoXYWH("*yw", this._hwndEdit)
 		}
 	}
 	
 	_ResetLogWait() {
-		This._prevWaitCommand := 0
-		This._prevWaitImage := 0
+		this._prevWaitCommand := 0
+		this._prevWaitImage := 0
 	}
 	
 	_StdOutImpl(str, nl:=True) {
@@ -319,8 +366,7 @@ Class ConsoleLogger {
 		obj := {a : "apple", b : "nom noms", c : ["hip", "hip", "hooray!"]}
 		name := "el_llamador"		; if changed, also change the function name below
 		winTitle := "BORG UPRISING"
-		inst := new ConsoleLogger(name, A_ScriptDir)
-		inst.Show(0, 0, 800, 500, winTitle)
+		inst := new ConsoleLogger(winTitle, A_ScriptDir, 0, 0, 800, 500)
 		
 		inst.Log("some")
 		inst.Log("stuff")
@@ -365,22 +411,12 @@ Class ConsoleLogger {
 		;~ inst.Append("LOL REALLY BRUH")
 		;~ inst.Append("<span>LOL REALLY BRUH</span>")
 		
-		
 		WinWaitClose, % winTitle
 		ExitApp
-		
-		; put here to prevent namespace pollution
-el_llamadorGuiSize:
-	If (A_EventInfo = 1)	; minimized
-		Return
-	; `inst` is visible because `_Main` thread is paused
-	inst.OnResize()
-return
-
 	}
 }
 
 ; debugging
-If (A_ScriptName="ConsoleLogger.ahk") {
+if (A_ScriptName="ConsoleLogger.ahk") {
 	ConsoleLogger._Main()
 }
