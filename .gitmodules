@@ -10,3 +10,6 @@
 [submodule "Lib/Eval"]
 	path = Lib/Eval
 	url = https://github.com/Pulover/Eval.git
+[submodule "Lib/Class_Console"]
+	path = Lib/Class_Console
+	url = https://github.com/CoeJoder/Class_Console.git
