@@ -1,0 +1,5 @@
+*.ahk.bak
+*.exe
+SciTE/
+scripts/ASCII art/*
+
