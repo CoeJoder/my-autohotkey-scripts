@@ -1,4 +1,15 @@
-; [JN] returns a map of the regkey values prior to being edited
+/*
+ ``````````````````````````````````````````````````````````````````````````````
+ ` FixIE()
+ ` Changes the rendering mode of the ActiveX browser control by editing the registry.
+ ` Modified from:  https://autohotkey.com/board/topic/93660-embedded-ie-shellexplorer-render-issues-fix-force-it-to-use-a-newer-render-engine/
+ `
+ ` @Version - The IE version to use (default uses system's installed browser, incl. Edge).
+ `            Empty string will delete the registry value.
+ ` @ExeName - The name of the process affected (default uses the currently running process).
+ ` return   - A map of the previous registry key values.
+ ``````````````````````````````````````````````````````````````````````````````
+ */
 FixIE(Version=0, ExeName="")
 { 
 	; [JN] added 32-bit key as well
