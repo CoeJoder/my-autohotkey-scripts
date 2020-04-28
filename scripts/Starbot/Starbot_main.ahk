@@ -1,9 +1,11 @@
-;**********************************************************************************
-; Starbot_main
-; 	Launches Starbot and configures the hotkeys.
-;
-; Author: Joe Nasca
-;**********************************************************************************
+/*
+ ``````````````````````````````````````````````````````````````````````````````
+ ` Starbot_main
+ ` Launches Starbot and configures the hotkeys.
+ `
+ ` Author: CoeJoder
+ ``````````````````````````````````````````````````````````````````````````````
+ */
 #Warn All, StdOut
 #Warn LocalSameAsGlobal, Off
 #NoEnv

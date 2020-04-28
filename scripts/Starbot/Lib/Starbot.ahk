@@ -1,10 +1,12 @@
-;**********************************************************************************
-; Starbot
-; 	Starcraft 2 Automation Tools.  This is the core library.
-;
-; Author: Joe Nasca
-;**********************************************************************************
-#Include <ConsoleApp>
+/*
+ ``````````````````````````````````````````````````````````````````````````````
+ ` Starbot
+ ` Starcraft 2 Automation Tools.  This is the core library.
+ `
+ ` Author: CoeJoder
+ ``````````````````````````````````````````````````````````````````````````````
+ */
+#Include <ConsoleLogger>
 #Include <JSON>
 #include <FunctionObject>
 #Include <HtmlUtils>
@@ -23,6 +25,7 @@ class Starbot {
 	static CONSOLE_INSTANCE := "" ; lazy init
 	static CONSOLE_NAME := "StarbotConsole"
 	static CONSOLE_WINTITLE := "Starbot Console"
+	static CONSOLE_HEADER_FONT_FAMILY := "'starcraftregular', sans-serif"
 	static CONSOLE_FONT := "Consolas"
 	static CONSOLE_FONT_SIZE := 14
 	static CONSOLE_INPUT_HEIGHT := 30
@@ -43,6 +46,7 @@ class Starbot {
 				, Starbot.CONSOLE_TIMESTAMP, Starbot.CONSOLE_FONT, Starbot.CONSOLE_FONT_SIZE, Starbot.CONSOLE_INPUT_HEIGHT)
 		this.console.Clear()
 		this.console.AddStylesheetElement(Starbot.CONSOLE_STYLESHEET)
+		this.console.AppendHtml(HtmlUtils.CenteredHeader(Starbot.__class, Starbot.CONSOLE_HEADER_FONT_FAMILY))
 		; GDI+
 		this.gdipToken := Gdip_Startup()
 		OnExit(Starbot.StopGdiPlus.Bind(this))
@@ -134,7 +138,7 @@ class Starbot {
 		this.console.Append("Choose a strategy:`n" . _text)
 		this.console.Activate()
 		this.console.FocusInput()
-		this.console.GetInput(ObjBindMethod(this, "SelectStrategy"))
+		this.console.OnInput(ObjBindMethod(this, "SelectStrategy"))
 	}
 	
 	_getStrategyNames() {
@@ -1499,7 +1503,7 @@ class Starbot {
 				this.console.Append("Choose an action:`n" . _text)
 				this.console.Activate()
 				this.console.FocusInput()
-				this.console.GetInput(ObjBindMethod(this, "_actionMenuCallback", _actionMap))
+				this.console.OnInput(ObjBindMethod(this, "_actionMenuCallback", _actionMap))
 			}
 		}
 		
