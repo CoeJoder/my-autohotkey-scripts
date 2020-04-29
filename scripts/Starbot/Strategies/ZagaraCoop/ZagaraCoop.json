@@ -1,0 +1,41 @@
+{
+    "coords": {},
+    "imageQueries": {
+        "selection: queen": {
+            "dims": {
+                "bottomRight": {
+                    "x": 947,
+                    "y": 1245
+                },
+                "topLeft": {
+                    "x": 893,
+                    "y": 1194
+                }
+            },
+            "path": "C:\\Users\\Joe\\Documents\\AutoHotkey\\scripts\\Starbot\\Strategies\\ZagaraCoop\\images\\selection_ queen_1.png",
+            "searchContext": {
+                "bottomRight": {
+                    "x": 1516,
+                    "y": 1424
+                },
+                "topLeft": {
+                    "x": 874,
+                    "y": 1180
+                }
+            }
+        }
+    },
+    "points": {},
+    "rects": {
+        "hatchery queens": {
+            "bottomRight": {
+                "x": "1654",
+                "y": "964"
+            },
+            "topLeft": {
+                "x": "955",
+                "y": "328"
+            }
+        }
+    }
+}
