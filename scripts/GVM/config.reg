@@ -1,0 +1,18 @@
+REGEDIT4
+
+[HKEY_CURRENT_USER\Control Panel\Desktop]
+"Wallpaper"="C:\\g\\TAD3.bmp"
+
+[HKEY_CURRENT_USER\SOFTWARE\Microsoft\Command Processor]
+"CompletionChar"=dword:9
+"PathCompletionChar"=dword:9
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Command Processor]
+"CompletionChar"=dword:9
+"PathCompletionChar"=dword:9
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts]
+"Consolas(TrueType)"="consola.ttf"
+"Consolas Bold (TrueType)"="consolab.ttf"
+"Consolas Bold Italic (TrueType)"="consolai.ttf"
+"Consolas Italic (TrueType)"="consolaz.ttf"

@@ -1,0 +1,35 @@
+kbd, div.section {
+    border: 1px solid #333;
+}
+
+kbd {
+    border-radius: 3px;
+    box-shadow: 0 1px 0 rgba(0,0,0,.2), 0 0 0 2px #000 inset;
+    color: #ccc;
+    display: inline-block;
+    font-family: Consolas,Courier New,monospace;
+    line-height: 1.4em;
+    margin: 0 .1em;
+    padding: 0 .3em;
+    text-shadow: 0 1px 0 #000;
+    white-space: nowrap;
+}
+
+div.section {
+    padding: 10px;
+    margin: 10px;
+    float: left;
+}
+
+div.section * {
+	white-space: nowrap;
+}
+
+div.section > h2 {
+    margin: 2px 2px 7px 2px;
+}
+
+div#container {
+    display: inline-block;
+    margin-bottom: 5px;
+}
