@@ -1,6 +1,7 @@
 /*
  ``````````````````````````````````````````````````````````````````````````````
  ` Starbot
+ `
  ` Starcraft 2 Automation Tools.  This is the core library.
  `
  ` Author: CoeJoder

@@ -1,6 +1,7 @@
 /*
  ``````````````````````````````````````````````````````````````````````````````
  ` MacroManager
+ `
  ` A text macro manager which assigns command keys to each (a-z).
  `
  ` Author: CoeJoder

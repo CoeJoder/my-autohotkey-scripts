@@ -1,6 +1,7 @@
 /*
  ``````````````````````````````````````````````````````````````````````````````
  ` GVM
+ `
  ` Macro console for collaborative VMs.
  `
  ` Author: CoeJoder
@@ -199,7 +200,7 @@ class GVM {
 			if (macro != "") {
 				Loop, Parse, % macro.body, `n
 				{
-					this.Send(A_LoopField "{Enter}")
+					this.SendText(A_LoopField "{Enter}")
 				}
 			}
 			else {
@@ -256,6 +257,10 @@ class GVM {
 		}
 	}
 	
+	SendText(text) {
+		this.Send("{Text}" text)
+	}
+	
 	Sleep(override:="") {
 		ms := (override != "") ? override : this._sleepDelay
 		Sleep, %ms%
@@ -268,10 +273,11 @@ class GVM {
 	
 	RunWindow(command:="") {
 		this.StartMenu()
-		this.Send("r")
+		this.SendText("r")
 		this.Sleep()
 		if (command != "") {
-			this.Send(command "{ENTER}")
+			this.SendText(command)
+			this.Send("{ENTER}")
 			this.Sleep()
 		}
 	}
@@ -280,7 +286,8 @@ class GVM {
 		Loop, Read, % this._vmScript
 		{
 			if (A_Index = line) {
-				this.Send(A_LoopReadLine "{Enter}")
+				this.SendText(A_LoopReadLine)
+				this.Send("{Enter}")
 			}
 		}
 	}
@@ -292,7 +299,8 @@ class GVM {
 			if (line > last)
 				break
 			if (A_Index = line) {
-				this.Send(A_LoopReadLine "{Enter}")
+				this.SendText(A_LoopReadLine)
+				this.Send("{Enter}")
 				line := line + 1
 			}
 		}

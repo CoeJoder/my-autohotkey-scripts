@@ -1,6 +1,7 @@
 /*
  ``````````````````````````````````````````````````````````````````````````````
  ` Starbot_main
+ `
  ` Launches Starbot and configures the hotkeys.
  `
  ` Author: CoeJoder

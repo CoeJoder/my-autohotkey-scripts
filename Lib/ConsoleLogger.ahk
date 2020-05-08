@@ -1,11 +1,11 @@
 /*
  ``````````````````````````````````````````````````````````````````````````````
  ` ConsoleLogger
+ 
  ` Wrapper class for the AfterLemon `console` class.
- `
  ` *** TODO *** remove the AfterLemon dependency and make this standalone.
  ` 
- ` @author CoeJoder
+ ` Author: CoeJoder
  ``````````````````````````````````````````````````````````````````````````````
  */
 #Include <Class_Console\Class_Console>
